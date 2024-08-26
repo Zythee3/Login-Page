@@ -1,11 +1,13 @@
 import React, { useState } from 'react'
 import axios from 'axios'
 import './SistemaLogin.css'
+import CheckMark from '../components/checkmark'
 
 
 function SistemaLogin() {
     // Cria as variaveis que vão ser usadas para o cadastramento 
     const [name, setName] = useState("")
+    const [isLoggedIn, setIsLoggedIn] = useState("Enviar")
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [emailInvalido, setEmailInvalido] = useState(false)
@@ -31,7 +33,7 @@ function SistemaLogin() {
     // função para adicionar os dados das variaveis em apenas uma chamado novo usuario
     const handleSubmit = () =>{
         if(name != "" && email != "" && password != ""){
-
+            
             
             if(validaEmail(email)){
                 setEmailInvalido(false)
@@ -49,8 +51,12 @@ function SistemaLogin() {
                 .catch(error =>{
                     console.error("erro ao adicionar o usuario", error);
                 });
+                
+                setIsLoggedIn(<CheckMark/>)
+
             }
             else{
+               
                 setEmailInvalido(true)
             }
         }
@@ -105,7 +111,7 @@ function SistemaLogin() {
             
         </div>
                 <div className='botao'>
-                    <button type="button" onClick={handleSubmit}>Enviar</button>
+                    <button type="button" onClick={handleSubmit}>{isLoggedIn}</button>
                     
                 </div>
 
