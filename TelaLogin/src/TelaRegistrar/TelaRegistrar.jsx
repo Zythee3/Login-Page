@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import axios from 'axios'
-import './SistemaLogin.css'
+import './TelaRegistrar.css'
 import CheckMark from '../components/checkmark'
 
 
@@ -11,6 +11,7 @@ function SistemaLogin() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [emailInvalido, setEmailInvalido] = useState(false)
+    const [userInvalido, setUserInvalido] = useState(false)
 
     // funções para preencher as variaveis
     const handleNameChange = (event) =>{
@@ -30,29 +31,50 @@ function SistemaLogin() {
         return regex.test(String(email))
     }
 
+    async function verificarUsuarioExiste(nomeUsuario) {
+       
+        const {data:response} = await axios.post('http://localhost:3000/verificar-usuario', {
+            nomeUsuario : nomeUsuario
+        })
+        
+        if (response == true){
+            return true
+        }
+        return false
+    }
+    
+
     // função para adicionar os dados das variaveis em apenas uma chamado novo usuario
-    const handleSubmit = () =>{
+    const handleSubmit = async () =>{
         if(name != "" && email != "" && password != ""){
             
             
             if(validaEmail(email)){
                 setEmailInvalido(false)
                 
-                const newUser = {
-                    name: name,
-                    email: email,
-                    password: password
-                };
+                if ( await verificarUsuarioExiste(name) == true){
+                    setUserInvalido(true)
+                }
                 
-                axios.post('http://localhost:3000/', newUser).then(response =>{
-                    console.log("usuario adicionado com sucesso ", response.data);
-                })
+                else {
+                    
+                    const newUser = {
+                        name: name,
+                        email: email,
+                        password: password
+                    };
+                    
+                    axios.post('http://localhost:3000/', newUser).then(response =>{
+                         console.log("usuario adicionado com sucesso ", response.data);
+                     })
+                    
+                    .catch(error =>{
+                         console.error("erro ao adicionar o usuario", error);
+                    });
+                    
+                    setIsLoggedIn(<CheckMark/>)
+                }
                 
-                .catch(error =>{
-                    console.error("erro ao adicionar o usuario", error);
-                });
-                
-                setIsLoggedIn(<CheckMark/>)
 
             }
             else{
@@ -86,6 +108,7 @@ function SistemaLogin() {
                         <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><g fill="none" stroke="white" stroke-width="1.5"><path stroke-linejoin="round" d="M4 18a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><circle cx="12" cy="7" r="3"/></g></svg>   
                     </div>
                 </div>
+                {userInvalido && (<div className='mensagemInvalido'><span>Este nome de usuário já possui cadastro!</span></div>)}
                 <div className='DivInput'>
                     
                     <input
@@ -96,7 +119,7 @@ function SistemaLogin() {
                         />
                     <div className="IconInput"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="white" d="M22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2zm-2 0l-8 5l-8-5zm0 12H4V8l8 5l8-5z"/></svg></div>
                 </div>
-                {emailInvalido && (<div className="mensagemEmailInvalido"><span>Email inválido!</span></div>)}
+                {emailInvalido && (<div className="mensagemInvalido"><span>Email inválido!</span></div>)}
                 
                 <div className='DivInput'>
                     
